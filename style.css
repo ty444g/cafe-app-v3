@@ -1,0 +1,239 @@
+:root {
+/* カラーパレット */
+--color-bg: #fcfbf7;
+--color-primary: #E07A5F;       /* テラコッタオレンジ */
+--color-secondary: #2E5D53;     /* ダークグリーン */
+--color-accent: #F2CC8F;        /* マスタードイエロー */
+--color-text: #333333;
+--color-text-light: #555555;
+--color-white: #ffffff;
+
+/* タイポグラフィ・共通設定 */
+--font-base: 'Helvetica Neue', Arial, sans-serif;
+--font-size-base: 16px;
+--border-radius: 6px;
+--transition: 0.25s ease;
+}
+
+* {
+box-sizing: border-box;
+margin: 0;
+padding: 0;
+}
+
+body {
+font-family: var(--font-base);
+font-size: var(--font-size-base);
+color: var(--color-text);
+background-color: var(--color-bg);
+line-height: 1.6;
+padding: 2rem;
+}
+
+h1, h2 {
+text-align: center;
+color: var(--color-text);
+margin-bottom: 1.5rem;
+}
+
+header{
+    justify-self: center;
+}
+
+.logo{
+    width: auto;
+    height: 16rem;
+}
+
+/* ナビ */
+nav {
+width: 100%;
+max-width: 600px;
+margin: 0 auto 2rem;
+display: flex;
+gap: 1rem;
+}
+
+nav button {
+flex: 1;
+padding: 0.75rem 1.5rem;
+font-size: 1rem;
+font-weight: bold;
+color: var(--color-text-light);
+background-color: transparent;
+border: 2px solid var(--color-text-light);
+border-radius: var(--border-radius);
+cursor: pointer;
+transition: background-color var(--transition), color var(--transition), border-color var(--transition), transform var(--transition);
+}
+
+nav button.active,
+nav button:hover {
+background-color: var(--color-secondary);
+color: var(--color-white);
+border-color: var(--color-secondary);
+transform: translateY(-2px);
+}
+
+/* カード（フォーム・ダッシュボードのコンテナ） */
+section {
+width: 100%;
+max-width: 600px;
+margin: 0 auto 2rem;
+background-color: var(--color-white);
+padding: 2rem;
+border-radius: var(--border-radius);
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* フォーム */
+form {
+display: grid;
+grid-template-columns: auto 1fr;
+grid-row-gap: 1rem;
+grid-column-gap: 1.5rem;
+align-items: center;
+}
+
+form label {
+text-align: right;
+font-weight: 600;
+color: var(--color-text-light);
+}
+
+form input[type="text"],
+form input[type="datetime-local"],
+form textarea {
+width: 100%;
+padding: 0.6rem 0.8rem;
+font-size: 1rem;
+border: 1px solid #ccc;
+border-radius: var(--border-radius);
+transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+form input:focus,
+form textarea:focus {
+outline: none;
+border-color: var(--color-secondary);
+box-shadow: 0 0 0 3px rgba(46, 93, 83, 0.2);
+}
+
+form button[type="submit"] {
+grid-column: 2;
+justify-self: center; /* ボタンを中央寄せ */
+padding: 0.7rem 2rem;
+font-size: 1rem;
+font-weight: bold;
+color: var(--color-white);
+background-color: var(--color-primary);
+border: none;
+border-radius: var(--border-radius);
+cursor: pointer;
+transition: background-color var(--transition), transform var(--transition);
+}
+
+form button[type="submit"]:hover {
+background-color: var(--color-accent);
+transform: translateY(-2px);
+}
+
+/* ダッシュボードテーブル */
+#dashboardSection {
+margin-top: 2rem;
+}
+
+/* HTML 上では <div id="savedData"> がテーブルを包んでいるので、ここで横スクロールを担当させます */
+#savedData {
+overflow-x: auto;
+/* 必要なら上下の余白も調整 */
+margin-top: 1rem;
+}
+
+/* ----- テーブル本体 ----- */
+table {
+width: 100%;           /* 親（#savedData）の幅に合わせる */
+/* table-layout: fixed;   列幅を固定レイアウトにして崩れを防止 */
+border-collapse: separate;
+border-spacing: 0;
+/* display:block や min-width はここでは不要に */
+}
+
+/* ----- セルの共通設定（行の高さ固定＆省略） ----- */
+thead th,
+tbody td {
+height: 3rem;               /* 行の高さを固定 */
+line-height: 3rem;          /* テキスト縦中央寄せ */
+white-space: nowrap;        /* 折り返し禁止 */
+/* overflow: hidden;           はみ出しを非表示 */
+/* text-overflow: ellipsis;    省略記号 */
+}
+
+
+/* ヘッダー背景はそのまま */
+thead {
+background-color: var(--color-secondary);
+color: var(--color-white);
+}
+
+
+tbody tr {
+background-color: var(--color-white);
+transition: background-color var(--transition);
+}
+
+tbody tr:nth-child(even) {
+background-color: #f7f7f7;
+}
+
+tbody tr:hover {
+background-color: #f2f0ec;
+}
+
+tbody td {
+padding: 0.75rem 1rem;
+color: var(--color-text-light);
+}
+
+.delete-btn {
+padding: 0.4rem 0.8rem;
+font-size: 0.9rem;
+color: var(--color-white);
+background-color: #d1495b;
+border: none;
+border-radius: var(--border-radius);
+cursor: pointer;
+transition: background-color var(--transition), transform var(--transition);
+}
+
+.delete-btn:hover {
+background-color: #c1121f;
+transform: translateY(-1px);
+}
+
+
+/* レスポンシブ調整 */
+@media (max-width: 600px) {
+body {
+    padding: 1rem;
+}
+nav, section {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    max-width: 90%;
+}
+form {
+    grid-template-columns: 1fr;
+    grid-row-gap: 0.75rem;
+}
+form label {
+    text-align: left;
+}
+form button[type="submit"] {
+    grid-column: 1;
+    width: 100%;
+}
+table {
+    font-size: 0.9rem;
+}
+}

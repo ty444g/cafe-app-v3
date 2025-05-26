@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CheckInCafe</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<!-- ここまで呪文 -->
+
+<body>
+    <!-- ヘッダーはテキスト付きのロゴ画像を設置、header、.logoに対してcssを当てている -->
+    <header>
+        <img class="logo" src="checkincafe-logo-txt.png" alt="logo">
+    </header>
+    <!-- ナビでは、チェックインと履歴を選べるように2つのボタンを配置。classがアクティブである方が表示される -->
+    <!-- jsで画面切り替えに使っている -->
+    <nav>
+      <button id="btnCheckin" class="active">チェックイン</button>
+      <button id="btnDashboard" class="">履歴</button>
+    </nav>
+
+    <!-- セクションで区切ることで、どっちのセクションを表示するか指定できる -->
+    <section id="checkinSection">
+        <h1>Check In</h1>
+        <!-- フォームタグのなかに、ラベルやインプットを配置 -->
+        <!-- labelは、クリックしたときに入力ボックスに飛べる。devとかでも良いが、良いコードはこっち -->
+        <form id="cafeForm">
+            <!-- forはinputのid属性と関連付けている。クリックするとそこにフォーカスが行くようになる -->
+            <!-- labelタグで囲った場合は、forはいらない -->
+            <label for="datetime">※日時 :</label>
+            <input type="datetime-local" id="datetime" name="datetime" required>
+
+            <label for="cafe_name">※カフェ :</label>
+            <input type="text" id="cafe_name" name="cafe_name" placeholder="例：スターバックス" required>
+
+            <label for="store_name">店舗 :</label>
+            <input type="text" id="store_name" name="store_name" placeholder="例：目黒店" required>
+
+            <label for="menu">メニュー :</label>
+            <input type="text" id="menu" name="menu" placeholder="例: ドリンク名（T）" required>
+
+            <label for="notes">備考 :</label>
+            <textarea id="notes" name="notes" rows="4" cols="50"></textarea>
+
+            <button type="submit">送信</button>
+        </form>
+    </section>
+
+    <!-- display:noneで最初は非表示 -->
+    <section id="dashboardSection" style="display:none;">
+        <h2>Check In 履歴</h2>
+        <div id="savedData"></div>
+    </section>
+
+
+    <script>
+        // 書き方は授業で習ったquerySelectorでも良いが、ブラウザの動作が一番早いのは、getElementByIdらしい
+        // const btnCheckin = document.querySelector('#btnCheckin');
+        // まずはidを使って取り出したい要素を定数に格納する
+        const btnCheckin = document.getElementById('btnCheckin');
+        const btnDashboard = document.getElementById('btnDashboard');
+        const checkinSection = document.getElementById('checkinSection');
+        const dashboardSection = document.getElementById('dashboardSection');
+
+        // --- タブ切替の実装 ---
+        // 普通に書くと下記のようになる。jQueryで書くなら少し簡易的にかける。
+        // <script src="https://code.jquery.com/jquery-3.6.0.min.js">
+        // $(function() {
+            // var $btnCheckin      = $('#btnCheckin');
+            // var $btnDashboard    = $('#btnDashboard');
+            // var $checkinSection  = $('#checkinSection');
+            // var $dashboardSection= $('#dashboardSection');
+        // チェックインボタンクリック時
+            //$btnCheckin.on('click', function() {
+                //$btnCheckin.addClass('active');
+                //$btnDashboard.removeClass('active');
+                //$checkinSection.show();    // display を '' 相当で再表示
+                //$dashboardSection.hide();  // display: none
+            //});
+        // });
+
+        btnCheckin.addEventListener('click', () => {
+        // クリックを監視
+        btnCheckin.classList.add('active');
+        // checkinを押したときに、checkinのclassをactiveにする
+        btnDashboard.classList.remove('active');
+        // 逆に、dashboard側のclassを削除する
+        checkinSection.style.display = '';
+        // また、displaynoneを削除して、表示させる
+        dashboardSection.style.display = 'none';
+        // 逆に、displaynoneにして表示させない
+        });
+
+        btnDashboard.addEventListener('click', () => {
+        btnDashboard.classList.add('active');
+        btnCheckin.classList.remove('active');
+        checkinSection.style.display = 'none';
+        dashboardSection.style.display = '';
+        displaySavedData(); 
+        // ダッシュボードの時は、毎回表を再表示したいので、renderをさせる。
+        });
+
+
+
+        // 保存データをテーブル形式で表示
+        function displaySavedData() {
+            const dataList = JSON.parse(localStorage.getItem('cafeDataList')) || [];
+            // localStorage.getItem('cafeDataList')で、cafeDataListに入っている値を取得する
+            // JSON.parseは、文字列をjsの配列、オブジェクトに変換する
+            // JSON.parse(null)の時にエラーになってしまうので、空配列[]を入れる
+            // 中身の形式が、[{A:a,B:b,C:c},{X:x,Y:y,Z:z}]みたいな配列。→これをオブジェクトの配列と呼ぶ
+            // ||はorという意味だが、jsだと左が偽の場合、右辺を返すという意味になる。
+            // つまり、左がnullの場合は、空配列を入れるという意味になる
+            const container = document.getElementById('savedData');
+
+            if (dataList.length === 0) {
+                container.innerText = '保存されたデータはありません。';
+                return;
+            }
+
+            let html = '<table>' +
+                '<thead><tr>' +
+                '<th>日時</th><th>カフェ</th><th>店舗</th><th>メニュー</th><th>備考</th><th>操作</th>' +
+                '</tr></thead><tbody>';
+
+            dataList.forEach((item, index) => {
+                const displayDatetime = item.datetime.replace('T', ' ');
+                // Tが邪魔だったので、それを取り除く指示
+                // itemには、オブジェクト（つまり、日時や、カフェ名などが全部入っている）、indexは配列としてのオブジェクトの番号
+                // item.nameで、{name:xxx}のxxxが取り出せる
+                // ${index}は、テンプレートリレラルで、そこに直接文字列が埋め込まれる。この場合は、indexの番号が入り、deleteEntry(2)とかになる
+                html += '<tr>' +
+                    `<td>${displayDatetime}</td>` +
+                    `<td>${item.cafe_name}</td>` +
+                    `<td>${item.store_name}</td>` +
+                    `<td>${item.menu}</td>` +
+                    `<td>${item.notes}</td>` +
+                    `<td><button class="delete-btn" onclick="deleteEntry(${index})">削除</button></td>` +
+                    '</tr>';
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+
+        // 指定行を削除
+        // indexは、引数として、削除ボタンを押した時に受け取る
+        // 配列操作のsplice(開始位置, 削除の個数)なので、indexの番号に該当するオブジェクト全体を削除する
+        // JSON.stringifyは配列を文字列に直す。それによって、localstorageに格納可能
+        // これを使えば、JSON形式の文字列をインポート、エクスポートとかできそう。
+        // localStorage.setItem(key, value)だが、valueは配列全体が該当するので、これで良い
+        function deleteEntry(index) {
+            const dataList = JSON.parse(localStorage.getItem('cafeDataList')) || [];
+            dataList.splice(index, 1);
+            localStorage.setItem('cafeDataList', JSON.stringify(dataList));
+            displaySavedData();
+        }
+
+
+        // フォーム送信時
+        document.getElementById('cafeForm').addEventListener('submit', function (event) {
+            // submitだと、ページ遷移してしまうのが、デフォルトだが、この呪文で、その動作をキャンセルできる
+            event.preventDefault();
+
+            const datetime = document.getElementById('datetime').value;
+            const cafe_name = document.getElementById('cafe_name').value;
+            const store_name = document.getElementById('store_name').value;
+            const menu = document.getElementById('menu').value;
+            const notes = document.getElementById('notes').value;
+
+            const newEntry = { datetime, cafe_name, store_name, menu, notes };
+
+            const dataList = JSON.parse(localStorage.getItem('cafeDataList')) || [];
+            dataList.push(newEntry);
+            localStorage.setItem('cafeDataList', JSON.stringify(dataList));
+
+            // 入力欄の内容をリセットしている
+            this.reset();
+            // 入力欄に現在時刻を入れる
+            setDefaultDatetime();
+            // 表に新しいデータを入れている
+            displaySavedData();
+        });
+
+        // 現在時刻を日本時間でデフォルトセット
+        function setDefaultDatetime() {
+            const dtInput = document.getElementById('datetime');
+            const now = new Date();
+            const parts = new Intl.DateTimeFormat('ja-JP', {
+                timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit', hour12: false
+            }).formatToParts(now);
+            const d = {};
+            parts.forEach(({ type, value }) => { if (type !== 'literal') d[type] = value; });
+            dtInput.value = `${d.year}-${d.month}-${d.day}T${d.hour}:${d.minute}`;
+        }
+
+        // ページ読み込み時
+        window.addEventListener('DOMContentLoaded', () => {
+            setDefaultDatetime();
+            displaySavedData();
+        });
+    </script>
+
+</body>
+</html>
